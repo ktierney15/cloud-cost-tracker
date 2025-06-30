@@ -28,9 +28,8 @@ def get_forecasted_cost(client, days=30):
 
     return response['Total']['Amount'], response['Total']['Unit']
 
-def get_previous_months_bill(client):
+def get_previous_months_bill(client, start, end):
     """Gets previous months bill"""
-    start, end = get_previous_month_dates()
     response = client.get_cost_and_usage(
         TimePeriod={
             'Start': start,
@@ -42,22 +41,45 @@ def get_previous_months_bill(client):
 
     return response['ResultsByTime'][0]['Total']['UnblendedCost']['Amount'], response['ResultsByTime'][0]['Total']['UnblendedCost']['Unit']
 
+def get_previous_bill_breakdown(client, start, end):
+    """Returns an item by item breakdown of your bill"""
+    output = {}
+    response = client.get_cost_and_usage(
+        TimePeriod={'Start': start, 'End': end},
+        Granularity='MONTHLY',
+        Metrics=['UnblendedCost'],
+        GroupBy=[{'Type': 'DIMENSION', 'Key': 'SERVICE'}]
+    )
+
+    for item in response["ResultsByTime"][0]["Groups"]:
+        output[item["Keys"][0]] = item["Metrics"]["UnblendedCost"]["Amount"]
+    
+    return output
+
 
 def generate_cost_summary():
     """Main AWS Function - Generates a cost summary"""
     # Initialize boto3 client for Cost Explorer
     client = boto3.client("ce")
 
+    # get previous months dates
+    start, end = get_previous_month_dates()
+
     # get custom cost data
     monthly_forecast, monthly_forecast_unit = get_forecasted_cost(client) 
-    previous_months_bill, previous_months_bill_unit = get_previous_months_bill(client)
+    previous_months_bill, previous_months_bill_unit = get_previous_months_bill(client, start, end)
+    previous_bill_breakdown = get_previous_bill_breakdown(client, start, end)
+
+
 
     # print(json.dumps(response, indent=2))
+
     
     
     return {
         'monthly_forecast': monthly_forecast, 
         'monthly_forecast_unit': monthly_forecast_unit, 
         'previous_months_bill': previous_months_bill, 
-        'previous_months_bill_unit': previous_months_bill_unit
+        'previous_months_bill_unit': previous_months_bill_unit,
+        'previous_bill_breakdown' : previous_bill_breakdown 
     }
