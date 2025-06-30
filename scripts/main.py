@@ -1,12 +1,18 @@
 from dotenv import load_dotenv
 import json
+import os
 
 import aws_requests
+import emails
 
 def main():
     aws_cost_data = aws_requests.generate_cost_summary()
-    print(json.dumps(aws_cost_data, indent=4))
-    pass
+    # print(json.dumps(aws_cost_data, indent=4))
+    # print(emails.create_email_body(aws_cost_data))
+    email_body = emails.create_email_body(aws_cost_data)
+    emails.send_email(email_body, os.getenv("EMAIL_RECIPIENT"), os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASSWORD"))
+
+
 if __name__ == '__main__':
     load_dotenv()
     main()
