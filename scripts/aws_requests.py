@@ -62,7 +62,7 @@ def generate_cost_summary():
     # Initialize boto3 client for Cost Explorer
     client = boto3.client("ce")
 
-    # get previous months dates
+    # get previous months start and end dates
     start, end = get_previous_month_dates()
 
     # get custom cost data
@@ -71,8 +71,7 @@ def generate_cost_summary():
     previous_bill_breakdown = get_previous_bill_breakdown(client, start, end)
 
 
-
-    # print(json.dumps(response, indent=2))
+    # print(json.dumps(response, indent=4))
 
     
     
