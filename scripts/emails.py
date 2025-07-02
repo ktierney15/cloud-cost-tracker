@@ -1,6 +1,13 @@
 import smtplib
 from email.mime.text import MIMEText
-import os
+import subprocess
+
+def notify(title, message):
+    subprocess.run([
+        "terminal-notifier",
+        "-title", title,
+        "-message", message
+    ])
 
 def create_email_body(payload):
     service_lines = "\n".join(
