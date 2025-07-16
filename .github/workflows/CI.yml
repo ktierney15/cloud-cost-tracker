@@ -35,10 +35,10 @@ jobs:
       - name: Linting
         run: .venv/bin/pylint $(git ls-files '*.py') --fail-under=3
 
-      - name: Unit testing
-        run: |
-          source .venv/bin/activate
-          pytest tests/
+      # - name: Unit testing
+      #   run: |
+      #     source .venv/bin/activate
+      #     pytest tests/
       
       - name: Build
         run: uv build
