@@ -14,6 +14,8 @@ dependencies = [
     "python-dotenv",
     "matplotlib",
     "python-dotenv",
+    "pylint>=3.3.7",
+    "pytest>=8.4.1",
 ]
 
 [tool.setuptools]
