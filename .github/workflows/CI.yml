@@ -1,0 +1,88 @@
+name: CI
+on:
+  # push:
+  #   branches: ["main"]
+  # pull_request:
+  #   branches: ["main", "develop"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup UV
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo 'export PATH="$HOME/.local/bin:$PATH' >> $GITHUB_ENV
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.13'
+      
+      - name: Setup virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          uv pip install -e .
+
+      - name: Linting
+        run: .venv/bin/pylint $(git ls-files '*.py') --fail-under=3
+
+      - name: Unit testing
+        run: |
+          source .venv/bin/activate
+          pytest tests/
+      
+      - name: Build
+        run: uv build
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  Version:
+    needs: CI
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Get Latest Tag
+        id: get-latest-tag
+        run: echo "::set-output name=TAG::$(git describe --tags --abbrev=0)"
+
+      - name: Read updated version from toml file
+        id: read-version
+        run: |
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "::set-output name=VERSION::$VERSION"
+
+      - name: Compare Versions and fail if not updated
+        run: |
+          if [[ "${{ steps.read-version.outputs.VERSION }}" == "${{ steps.get-latest-tag.outputs.TAG }}" ]]; then
+            echo "Version has not been incremented. Please increment version in your pyproject.toml and rerun the pipeline"
+            exit 1
+          fi
+
+      - name: Update Git tag
+        run: |
+          VERSION="${{ steps.read-version.outputs.VERSION }}"
+          git tag $VERSION
+          git push origin $VERSION
