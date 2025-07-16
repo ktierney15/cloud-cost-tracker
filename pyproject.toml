@@ -17,4 +17,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["aws_cost_tracker"]
+packages = ["scripts"]
