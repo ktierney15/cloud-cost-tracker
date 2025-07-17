@@ -11,7 +11,7 @@ Then you can rename the EXAMPLE.env file to .env and set your environment variab
 
 AWS_ACCESS_KEY_ID - AWS access key ID  
 AWS_SECRET_ACCESS_KEY - AWS access key secret 
-AWS_DEFAULT_REGION= - region you are gathering information from  
+AWS_DEFAULT_REGION - region you are gathering information from  
 EMAIL_USER - email that you are sending from 
 EMAIL_PASSWORD - email password  
 EMAIL_RECIPIENT - email that you are sending the summary to
@@ -26,7 +26,7 @@ And setting the content of that file to the following:
 0 7 1 * * /path/to/cloud-cost-tracker/run-cloud-cost-estimator.sh >> /path/to/cron_log.txt 2>&1
 ```
 
-**Optional Step** - to send emails with this script you will need to enable your email to send emails with smtplib. For gmail for instance you have to setup multifactor authentication, then create a password for the script to use at https://myaccount.google.com/apppasswords  
+**Optional Step** - to send emails with this script you will need to enable your email to use smtplib. For gmail for instance you have to setup multifactor authentication, then create a password for the script to use at https://myaccount.google.com/apppasswords  
 if you dont want to use the email functionality you can remove the --email flag from the shell script
 
 ## Usage
