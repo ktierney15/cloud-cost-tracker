@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cost-tracker",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd backend && uv run cost-tracker serve --port 8000"],
+      "port": 8000
+    }
+  ]
+}
