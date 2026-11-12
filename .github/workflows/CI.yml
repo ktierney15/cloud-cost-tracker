@@ -13,41 +13,32 @@ permissions:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup UV
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo 'export PATH="$HOME/.local/bin:$PATH' >> $GITHUB_ENV
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.13'
-      
-      - name: Setup virtual environment
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          uv pip install -e .
+      - name: Install dependencies
+        run: uv sync --frozen --python 3.13
 
       - name: Linting
-        run: .venv/bin/pylint $(git ls-files '*.py') --fail-under=3
+        run: uv run pylint src --fail-under=7
 
-      # - name: Unit testing
-      #   run: |
-      #     source .venv/bin/activate
-      #     pytest tests/
-      
+      - name: Unit testing
+        run: uv run pytest
+
       - name: Build
         run: uv build
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: backend/dist/
 
   Version:
     needs: CI
@@ -71,7 +62,7 @@ jobs:
       - name: Read updated version from toml file
         id: read-version
         run: |
-          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('backend/pyproject.toml', 'rb'))['project']['version'])")
           echo "::set-output name=VERSION::$VERSION"
 
       - name: Compare Versions and fail if not updated
