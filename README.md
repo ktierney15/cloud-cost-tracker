@@ -34,6 +34,16 @@ The AWS credentials need `ce:GetCostAndUsage`, `ce:GetCostForecast`, `ce:GetDime
 
 ## Run the dashboard
 
+From the repo root:
+
+```bash
+make start   # run in the background at http://127.0.0.1:8000
+make stop    # stop it (also frees the port if something else is holding it)
+make help    # run, dev, restart, status, logs, test, report, email…
+```
+
+Use `PORT=8001 make start` for another port. Or run it directly:
+
 ```bash
 cd backend
 uv run cost-tracker serve
